@@ -2,27 +2,31 @@
 
 #include <lib/bst.hpp>
 
-#define f(a) std::cout << (a) << std::endl;
-
 int main() {
-//  bst<int, Postorder> b;
-//  b.insert(100);
-//  b.insert(20);
-//  b.insert(10);
-//  b.insert(30);
-//  b.insert(200);
-//  b.insert(150);
-//  b.insert(149);
-//  b.insert(300);
-  bst<int> c({1, 2, 3, 4, 5});
-  auto d = c.begin();
-  f(*d)
-  ++d;
-  f(*d)
-  bst<int> a({1, 2, 3, 4});
-  auto b = a.begin();
-  f(*b)
-  ++b;
-  f(*b)
+  bst<int, Postorder> a; // {}
+  a.insert(2); // {2}
+  a.insert(3); // {2, 3}
+
+  bst<int, Inorder> b({1, 2, 3, 4, 5}); // {1, 2, 3, 4, 5}
+
+  bst<std::string, Preorder> c = {"foo", "bar", "baz"}; // {"foo", "bar", "baz"}
+  c.insert("bat"); // {"foo", "bar", "baz", "bat"}
+  c.extract("bar"); // {"foo", "baz", "bat"}
+
+  std::cout << std::boolalpha << c.contains("bat") << std::endl; // true
+  std::cout << std::boolalpha << c.contains("bar") << std::endl; // false
+
+  auto it = c.begin();
+
+  std::cout << (*it) << std::endl; // foo
+
+  ++it;
+
+  std::cout << (*it) << std::endl; // baz
+
+  --it;
+
+  std::cout << (*it) << std::endl; // foo
+
   return 0;
 }
