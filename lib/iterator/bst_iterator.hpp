@@ -1,81 +1,75 @@
 #pragma once
 
 #include <iterator>
+#include <iostream>
 
 struct Preorder {};
 struct Inorder {};
 struct Postorder {};
 
 template<class T, typename Tag = Preorder>
-class iterator {
+class bst_iterator {
  private:
-  T* current;
+  T* current{};
 
  public:
-  typedef std::ptrdiff_t pointer_difference;
-  typedef T value_type;
-  typedef T* pointer;
-  typedef T& reference;
-  typedef const T& const_reference;
+  using difference_type = std::ptrdiff_t;
+  using value_type = T;
+  using pointer = T*;
+  using reference = T&;
+  using const_reference = const T&;
+  using traversal = Tag;
 
-  iterator() : current() {};
-  iterator(const iterator<value_type>& _x) : current(_x.current) {};
-  iterator(pointer current) : current(current) {};
+  bst_iterator() : current() {};
+  bst_iterator(const bst_iterator<value_type>& _x) : current(_x.current) {};
+  bst_iterator(pointer current) : current(current) {};
 
-//  iterator& operator=(const iterator<value_type>& _x);
-//  iterator& operator=(pointer _x); fixme
+  explicit operator bst_iterator<const T>() requires (std::is_const_v<T> == false);
 
-  ~iterator() noexcept = default;
+  ~bst_iterator() noexcept = default;
 
   reference operator*() const noexcept;
   reference operator->() const noexcept;
 
-  iterator& operator++() noexcept;
-  const iterator operator++(int) noexcept;
+  bst_iterator& operator++() noexcept;
+  const bst_iterator operator++(int) noexcept;
 
-  iterator& operator--() noexcept;
-  const iterator operator--(int) noexcept;
+  bst_iterator& operator--() noexcept;
+  const bst_iterator operator--(int) noexcept;
 
-  iterator operator+(int n) noexcept;
-  iterator operator-(int n) noexcept;
+  bst_iterator operator+(int n) noexcept;
+  bst_iterator operator-(int n) noexcept;
 
-  iterator operator+=(int n) noexcept;
-  iterator operator-=(int n) noexcept;
+  bst_iterator operator+=(int n) noexcept;
+  bst_iterator operator-=(int n) noexcept;
 
-  bool operator==(const iterator& _x) const noexcept;
-  bool operator!=(const iterator& _x) const noexcept;
+  bool operator==(const bst_iterator& _x) const noexcept;
+  bool operator!=(const bst_iterator& _x) const noexcept;
 
-  bool operator>(const iterator& _x) const noexcept;
-  bool operator>=(const iterator& _x) const noexcept;
+  bool operator>(const bst_iterator& _x) const noexcept;
+  bool operator>=(const bst_iterator& _x) const noexcept;
 
-  bool operator<(const iterator& _x) const noexcept;
-  bool operator<=(const iterator& _x) const noexcept;
+  bool operator<(const bst_iterator& _x) const noexcept;
+  bool operator<=(const bst_iterator& _x) const noexcept;
 };
 
-//template<class T, typename Tag>
-//iterator<T, Tag>& iterator<T, Tag>::operator=(iterator::pointer _x) {
-//  current = _x;
-//  return *this;
-//}
-//
-//template<class T, typename Tag>
-//iterator<T, Tag>& iterator<T, Tag>::operator=(const iterator<T>& _x) {
-//  current = _x.current;
-//  return *this;
-//} fixme
+template<class T, typename Tag>
+inline bst_iterator<T, Tag>::operator bst_iterator<const T>() requires (std::is_const_v<T> == false) {
+  return bst_iterator<const T>(current);
+}
 
 template<class T, typename Tag>
-inline iterator<T, Tag>::reference iterator<T, Tag>::operator*() const noexcept {
+inline bst_iterator<T, Tag>::reference bst_iterator<T, Tag>::operator*() const noexcept {
   return *current;
 }
 
 template<class T, typename Tag>
-inline T& iterator<T, Tag>::operator->() const noexcept {
+inline T& bst_iterator<T, Tag>::operator->() const noexcept {
   return current;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag>& iterator<T, Tag>::operator++() noexcept {
+inline bst_iterator<T, Tag>& bst_iterator<T, Tag>::operator++() noexcept {
   try {
     if constexpr (std::is_same_v<Tag, Preorder>) {
       if (current->left && !current->left->visited) {
@@ -156,14 +150,14 @@ inline iterator<T, Tag>& iterator<T, Tag>::operator++() noexcept {
 }
 
 template<class T, typename Tag>
-inline const iterator<T, Tag> iterator<T, Tag>::operator++(int) noexcept {
-  iterator<T, Tag> _tmp = *this;
+inline const bst_iterator<T, Tag> bst_iterator<T, Tag>::operator++(int) noexcept {
+  bst_iterator<T, Tag> _tmp = *this;
   this->operator++();
   return _tmp;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag>& iterator<T, Tag>::operator--() noexcept {
+inline bst_iterator<T, Tag>& bst_iterator<T, Tag>::operator--() noexcept {
   try {
     if constexpr (std::is_same_v<Tag, Preorder>) {
       if (current->parent) {
@@ -196,63 +190,69 @@ inline iterator<T, Tag>& iterator<T, Tag>::operator--() noexcept {
 }
 
 template<class T, typename Tag>
-inline const iterator<T, Tag> iterator<T, Tag>::operator--(int) noexcept {
-  iterator<T, Tag> _tmp = *this;
+inline const bst_iterator<T, Tag> bst_iterator<T, Tag>::operator--(int) noexcept {
+  bst_iterator<T, Tag> _tmp = *this;
   this->operator--();
   return _tmp;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag> iterator<T, Tag>::operator+(int n) noexcept {
+inline bst_iterator<T, Tag> bst_iterator<T, Tag>::operator+(int n) noexcept {
   if (n == 0) { return *this; }
   if (n < 0) { return operator-(-n); }
-  return iterator(current + n);
+  for (int i = 0; i < n; i++) {
+    operator++();
+  }
+  return *this;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag> iterator<T, Tag>::operator-(int n) noexcept {
+inline bst_iterator<T, Tag> bst_iterator<T, Tag>::operator-(int n) noexcept {
   if (n <= 0) { return operator+(-n); }
-  return iterator(current - n);
+  for (int i = 0; i < n; i++) {
+    operator--();
+  }
+  return *this;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag> iterator<T, Tag>::operator+=(int n) noexcept {
+inline bst_iterator<T, Tag> bst_iterator<T, Tag>::operator+=(int n) noexcept {
   current += n;
   return *this;
 }
 
 template<class T, typename Tag>
-inline iterator<T, Tag> iterator<T, Tag>::operator-=(int n) noexcept {
+inline bst_iterator<T, Tag> bst_iterator<T, Tag>::operator-=(int n) noexcept {
   current -= n;
   return *this;
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator==(const iterator& _x) const noexcept {
-  return current == _x.current;
+inline bool bst_iterator<T, Tag>::operator==(const bst_iterator& _x) const noexcept {
+  return *current == *_x.current;
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator!=(const iterator& _x) const noexcept {
+inline bool bst_iterator<T, Tag>::operator!=(const bst_iterator& _x) const noexcept {
   return !(this->operator==(_x));
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator>(const iterator& _x) const noexcept {
+inline bool bst_iterator<T, Tag>::operator>(const bst_iterator& _x) const noexcept {
   return current > _x.current;
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator>=(const iterator& _x) const noexcept {
+inline bool bst_iterator<T, Tag>::operator>=(const bst_iterator& _x) const noexcept {
   return current >= _x.current;
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator<(const iterator& _x) const noexcept {
+inline bool bst_iterator<T, Tag>::operator<(const bst_iterator& _x) const noexcept {
   return current < _x.current;
 }
 
 template<class T, typename Tag>
-inline bool iterator<T, Tag>::operator<=(const iterator& _x) const noexcept {
+inline bool bst_iterator<T, Tag>::operator<=(const bst_iterator& _x) const noexcept {
   return current <= _x.current;
 }
