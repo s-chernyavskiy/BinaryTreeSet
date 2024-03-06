@@ -178,6 +178,8 @@ inline bst_iterator<T, Tag>& bst_iterator<T, Tag>::operator--() noexcept {
         current = current->right;
       } else if (current == current->parent->right) {
         current = current->parent->left;
+      } else if (current->parent) {
+        current = current->parent;
       } else {
         throw std::runtime_error("Out of bounds.");
       }
