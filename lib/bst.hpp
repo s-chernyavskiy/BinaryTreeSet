@@ -5,20 +5,20 @@
 
 #include <lib/iterator/bst_iterator.hpp>
 
-template<class Key, class Value, class Traversal = Preorder, class Alloc = std::allocator<std::tuple<Key, Value, Traversal>>>
+template<class Key, class Value, class Traversal = Preorder, class Alloc = std::allocator<std::pair<Key, Value>>>
 class bst {
  private:
   size_t size_ = 0;
   Alloc allocator_{};
 
   struct Node {
-    std::pair<const Key, Value> value;
+    std::pair<Key, Value> value;
 
     Node* left = nullptr;
     Node* right = nullptr;
     Node* parent = nullptr;
     bool visited = false;
-    explicit Node(std::pair<const Key, Value> value) : value(value), left(nullptr), right(nullptr), parent(nullptr), visited(false) {};
+    explicit Node(std::pair<Key, Value> value) : value(value), left(nullptr), right(nullptr), parent(nullptr), visited(false) {};
     ~Node() noexcept {
       left = nullptr;
       right = nullptr;
@@ -32,13 +32,15 @@ class bst {
   Node* last_ = nullptr;
 
   void del_(Node* current);
-  Node* insert_(Node* current, std::pair<const Key, Value> value);
+  Node* insert_(Node* current, std::pair<Key, Value> value);
   Node* extract_(Node* current, Key value);
   Node* get_min_(Node* current);
+  Node* get_max_(Node* current);
   Node* find_(Node* current, Key value);
   Node* copy(Node* other, Node* parent = nullptr);
  public:
-  using allocator_type = typename std::allocator_traits<Alloc>::template rebind_alloc<std::pair<const Key, Value>>;
+  using allocator_type = typename std::allocator_traits<Alloc>::template rebind_alloc<std::pair<Key, Value>>;
+  using allocator_traits = typename std::allocator_traits<Alloc>::template rebind_traits<std::pair<Key, Value>>;
 
   using iterator = bst_iterator<Node, Traversal>;
   using const_iterator = const iterator;
@@ -51,7 +53,7 @@ class bst {
   using size_type = std::size_t;
   using node_type = Node;
 
-  using value_type = std::pair<const Key, Value>;
+  using value_type = std::pair<Key, Value>;
   using reference = value_type&;
   using const_reference = const value_type&;
   using pointer = std::allocator_traits<Alloc>::pointer;
@@ -85,7 +87,7 @@ class bst {
 
   void insert(value_type value) { root_ = insert_(root_, value); };
   void insert(std::initializer_list<value_type> initializer_list);
-  void extract(key_type value) { root_ = extract_(root_, value); };
+  void extract(key_type value) { root_ = extract_(root_, value); if (root_ == nullptr) last_ == nullptr; };
 
   bool contains(key_type value) { return find_(root_, value) != nullptr; }
 
@@ -151,7 +153,7 @@ void bst<Key, Value, Traversal, Alloc>::del_(Node* current) {
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::insert_(bst::Node* current, std::pair<const Key, Value> value) {
+bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::insert_(bst::Node* current, std::pair<Key, Value> value) {
   if (current == nullptr) {
     last_ = new Node(value);
     ++size_;
@@ -177,11 +179,17 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
-  if (!current) {
-    delete last_;
-    return nullptr;
+bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_max_(bst::Node* current) {
+  if (current != nullptr && current->right != nullptr) {
+    return get_min_(current->right);
   }
+  return current;
+}
+
+template<class Key, class Value, class Traversal, class Alloc>
+typename bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
+  if (!current) return nullptr;
+
   if (value < current->value.first) {
     current->left = extract_(current->left, value);
     if (current->left) current->left->parent = current;
@@ -193,13 +201,23 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extr
       Node* temp = current->right;
       delete current;
       --size_;
+      if (last_ == current) {
+        last_ = (temp) ? get_max_(temp) : nullptr;
+      }
       return temp;
     } else if (!current->right) {
       Node* temp = current->left;
       delete current;
       --size_;
+      if (last_ == current) {
+        last_ = get_max_(temp);
+      }
       return temp;
     }
+
+    Node* successor = get_min_(current->right);
+    current->value = successor->value;
+    current->right = extract_(current->right, successor->value.first);
   }
 
   return current;
