@@ -46,6 +46,7 @@ TEST(ITERATOR_BASIC_OPERATORS, GREATER_THAN_OPERATOR) {
   int* c = &d;
   bst_iterator<int> lhs(b);
   bst_iterator<int> rhs(c);
+//  std::cout << *lhs << ' ' << *rhs << std::endl;
   EXPECT_TRUE(rhs > lhs);
 }
 

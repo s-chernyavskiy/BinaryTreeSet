@@ -3,30 +3,32 @@
 #include <lib/bst.hpp>
 
 int main() {
-  bst<int, Postorder> a; // {}
-  a.insert(2); // {2}
-  a.insert(3); // {2, 3}
+  bst<int, int, Postorder> a; // {}
+  a.insert(std::make_pair(2, 1)); // {{2, 1}}
+  a.insert({3, 1}); // {{2, 1}, {3, 1}}
+  // adding in both ways are possible
 
-  bst<int, Inorder> b({1, 2, 3, 4, 5}); // {1, 2, 3, 4, 5}
+  bst<int, int, Inorder> b({{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}});
+  // {{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}}
 
-  bst<std::string, Preorder> c = {"foo", "bar", "baz"}; // {"foo", "bar", "baz"}
-  c.insert("bat"); // {"foo", "bar", "baz", "bat"}
-  c.extract("bar"); // {"foo", "baz", "bat"}
+  bst<std::string, int, Preorder> c = {{"foo", 1}, {"bar", 1}, {"baz", 1}}; // {{"foo", 1}, {"bar", 1}, {"baz", 1}}
+  c.insert({"bat", 1}); // {{"foo", 1}, {"bar", 1}, {"baz", 1}, {"bat", 1}}
+  c.extract("bar"); // {{"foo", 1}, {"baz", 1}, {"bat", 1}}
 
   std::cout << std::boolalpha << c.contains("bat") << std::endl; // true
   std::cout << std::boolalpha << c.contains("bar") << std::endl; // false
 
   auto it = c.begin();
 
-  std::cout << (*it) << std::endl; // foo
+  std::cout << (*it) << std::endl; // {foo, 1}
 
   ++it;
 
-  std::cout << (*it) << std::endl; // baz
+  std::cout << (*it) << std::endl; // {baz, 1}
 
   --it;
 
-  std::cout << (*it) << std::endl; // foo
+  std::cout << (*it) << std::endl; // {foo, 1}
 
   return 0;
 }

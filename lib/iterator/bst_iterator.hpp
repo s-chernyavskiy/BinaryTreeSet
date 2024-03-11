@@ -241,20 +241,20 @@ inline bool bst_iterator<T, Tag>::operator!=(const bst_iterator& _x) const noexc
 
 template<class T, typename Tag>
 inline bool bst_iterator<T, Tag>::operator>(const bst_iterator& _x) const noexcept {
-  return current > _x.current;
+  return *current > *_x.current;
 }
 
 template<class T, typename Tag>
 inline bool bst_iterator<T, Tag>::operator>=(const bst_iterator& _x) const noexcept {
-  return current >= _x.current;
+  return *current >= *_x.current;
 }
 
 template<class T, typename Tag>
 inline bool bst_iterator<T, Tag>::operator<(const bst_iterator& _x) const noexcept {
-  return current < _x.current;
+  return *current < *_x.current;
 }
 
 template<class T, typename Tag>
 inline bool bst_iterator<T, Tag>::operator<=(const bst_iterator& _x) const noexcept {
-  return current <= _x.current;
+  return *current <= *_x.current;
 }
