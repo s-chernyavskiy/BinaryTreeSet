@@ -6,7 +6,7 @@ int main() {
   bst<int, int, Postorder> a; // {}
   a.insert(std::make_pair(2, 1)); // {{2, 1}}
   a.insert({3, 1}); // {{2, 1}, {3, 1}}
-  // adding in both ways are possible
+  // inserting both ways is possible
 
   bst<int, int, Inorder> b({{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}});
   // {{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}}
