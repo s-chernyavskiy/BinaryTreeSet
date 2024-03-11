@@ -41,7 +41,9 @@ class bst {
   using allocator_type = typename std::allocator_traits<Alloc>::template rebind_alloc<std::pair<const Key, Value>>;
 
   using iterator = bst_iterator<Node, Traversal>;
-  using const_iterator = const iterator&;
+  using const_iterator = const iterator;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   using key_type = Key;
   using mapped_type = Value;
@@ -83,15 +85,23 @@ class bst {
 
   void insert(value_type value) { root_ = insert_(root_, value); };
   void insert(std::initializer_list<value_type> initializer_list);
-  void extract(Key value) { root_ = extract_(root_, value); };
+  void extract(key_type value) { root_ = extract_(root_, value); };
 
-  bool contains(Key value) { return find_(root_, value) != nullptr; }
+  bool contains(key_type value) { return find_(root_, value) != nullptr; }
 
   iterator begin() const { return iterator(root_); }
   iterator end() const { return iterator(last_); }
 
   const_iterator cbegin() const noexcept { return root_ ? const_iterator(root_) : const_iterator(nullptr); }
   const_iterator cend() const noexcept { return last_ ? const_iterator(last_) : const_iterator(nullptr); }
+
+  reverse_iterator rbegin() const noexcept { return last_ ? reverse_iterator(last_) : reverse_iterator(nullptr); }
+  reverse_iterator rend() const noexcept { return root_ ? reverse_iterator(root_) : reverse_iterator(nullptr); }
+
+  const_reverse_iterator crbegin() const noexcept { return last_ ? const_reverse_iterator(last_) : const_reverse_iterator(nullptr); }
+  const_reverse_iterator crend() const noexcept { return root_ ? const_reverse_iterator(root_) : const_reverse_iterator(nullptr); }
+
+  void clear();
 
   size_t size() { return size_; }
   bool operator==(const bst& other) const noexcept;
@@ -101,6 +111,14 @@ class bst {
   iterator operator[](size_t i);
   const_iterator operator[](size_t i) const;
 };
+
+template<class Key, class Value, class Traversal, class Alloc>
+void bst<Key, Value, Traversal, Alloc>::clear() {
+  size_t bst_size = size_;
+  for (size_t i = 0; i < bst_size; i++) {
+    extract((*operator[](0)).value.first);
+  }
+}
 
 template<class Key, class Value, class Traversal, class Alloc>
 bst<Key, Value, Traversal, Alloc>::bst(std::initializer_list<value_type> initializer_list) {
@@ -160,7 +178,10 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_
 
 template<class Key, class Value, class Traversal, class Alloc>
 bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
-  if (!current) return nullptr;
+  if (!current) {
+    delete last_;
+    return nullptr;
+  }
   if (value < current->value.first) {
     current->left = extract_(current->left, value);
     if (current->left) current->left->parent = current;
