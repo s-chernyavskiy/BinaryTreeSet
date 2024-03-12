@@ -92,6 +92,10 @@ class bst {
 
   void insert(value_type value) { root_ = insert_(root_, value); };
   void insert(std::initializer_list<value_type> initializer_list);
+  void insert(iterator i, iterator j);
+
+  size_t count(key_type key) const noexcept;
+
   void extract(key_type value) {
     root_ = extract_(root_, value);
     if (root_ == nullptr) last_ == nullptr;
@@ -124,7 +128,28 @@ class bst {
   void swap(bst& other);
   iterator operator[](size_t i);
   const_iterator operator[](size_t i) const;
+
+  void merge(const bst& other) { return insert(other.begin(), other.end()); }
 };
+
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+size_t bst<Key, Value, Traversal, Compare, Alloc>::count(key_type key) const noexcept {
+  size_t count = 0;
+  for (auto it = begin(); it != end(); it++) {
+    if ((*it).value.first == key) {
+      count++;
+    }
+  }
+  return count;
+}
+
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+void bst<Key, Value, Traversal, Compare, Alloc>::insert(bst::iterator i, bst::iterator j) {
+  for (; i != j; i++) {
+    insert((*i).value);
+  }
+  insert((*i).value);
+}
 
 template<class Key, class Value, class Traversal, class Compare, class Alloc>
 void bst<Key, Value, Traversal, Compare, Alloc>::clear() {

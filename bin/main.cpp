@@ -36,5 +36,12 @@ int main() {
 
   std::cout << c.size() << std::endl; // 0
 
+  bst<int, int, Inorder> d; // {}
+  d.insert(b.begin(), b.end()); // d == b == {{1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}}
+
+  std::cout << d.size() << std::endl; // 5;
+
+  std::cout << d.count(1) << std::endl;
+
   return 0;
 }
