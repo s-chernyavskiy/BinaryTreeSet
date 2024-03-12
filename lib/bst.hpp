@@ -18,7 +18,8 @@ class bst {
     Node* right = nullptr;
     Node* parent = nullptr;
     bool visited = false;
-    explicit Node(std::pair<Key, Value> value) : value(value), left(nullptr), right(nullptr), parent(nullptr), visited(false) {};
+    explicit Node(std::pair<Key, Value> value)
+        : value(value), left(nullptr), right(nullptr), parent(nullptr), visited(false) {};
     ~Node() noexcept {
       left = nullptr;
       right = nullptr;
@@ -87,7 +88,10 @@ class bst {
 
   void insert(value_type value) { root_ = insert_(root_, value); };
   void insert(std::initializer_list<value_type> initializer_list);
-  void extract(key_type value) { root_ = extract_(root_, value); if (root_ == nullptr) last_ == nullptr; };
+  void extract(key_type value) {
+    root_ = extract_(root_, value);
+    if (root_ == nullptr) last_ == nullptr;
+  };
 
   bool contains(key_type value) { return find_(root_, value) != nullptr; }
 
@@ -100,8 +104,12 @@ class bst {
   reverse_iterator rbegin() const noexcept { return last_ ? reverse_iterator(last_) : reverse_iterator(nullptr); }
   reverse_iterator rend() const noexcept { return root_ ? reverse_iterator(root_) : reverse_iterator(nullptr); }
 
-  const_reverse_iterator crbegin() const noexcept { return last_ ? const_reverse_iterator(last_) : const_reverse_iterator(nullptr); }
-  const_reverse_iterator crend() const noexcept { return root_ ? const_reverse_iterator(root_) : const_reverse_iterator(nullptr); }
+  const_reverse_iterator crbegin() const noexcept {
+    return last_ ? const_reverse_iterator(last_) : const_reverse_iterator(nullptr);
+  }
+  const_reverse_iterator crend() const noexcept {
+    return root_ ? const_reverse_iterator(root_) : const_reverse_iterator(nullptr);
+  }
 
   void clear();
 
@@ -153,7 +161,8 @@ void bst<Key, Value, Traversal, Alloc>::del_(Node* current) {
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::insert_(bst::Node* current, std::pair<Key, Value> value) {
+bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::insert_(bst::Node* current,
+                                                                                    std::pair<Key, Value> value) {
   if (current == nullptr) {
     last_ = new Node(value);
     ++size_;
@@ -187,7 +196,7 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-typename bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
+bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
   if (!current) return nullptr;
 
   if (value < current->value.first) {
@@ -224,7 +233,7 @@ typename bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, All
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-inline bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::find_(bst::Node* current, key_type value) {
+bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::find_(bst::Node* current, key_type value) {
   if (!current) { return nullptr; }
   if (value < current->value.first) {
     return find_(current->left, value);
@@ -235,7 +244,7 @@ inline bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-inline bool bst<Key, Value, Traversal, Alloc>::operator==(const bst& other) const noexcept {
+bool bst<Key, Value, Traversal, Alloc>::operator==(const bst& other) const noexcept {
   if (size_ != other.size_) {
     return false;
   }
@@ -253,7 +262,7 @@ inline bool bst<Key, Value, Traversal, Alloc>::operator==(const bst& other) cons
 }
 
 template<class Key, class Value, class Traversal, class Alloc>
-inline bool bst<Key, Value, Traversal, Alloc>::operator!=(const bst& other) const noexcept {
+bool bst<Key, Value, Traversal, Alloc>::operator!=(const bst& other) const noexcept {
   return !(this->operator==(other));
 }
 

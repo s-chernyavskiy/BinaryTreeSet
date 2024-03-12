@@ -30,9 +30,11 @@ int main() {
 
   std::cout << (*it) << std::endl; // {foo, 1}
 
-  c.clear();
+  std::cout << c.size() << std::endl; // 3
 
-  std::cout << c.size();
+  c.clear(); // {}
+
+  std::cout << c.size() << std::endl; // 0
 
   return 0;
 }
