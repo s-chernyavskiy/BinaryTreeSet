@@ -14,14 +14,14 @@ TEST(BST_INIT, INITIALIZER_LIST_CONSTRUCTOR) {
 
 TEST(BST_INIT, OTHER_BST_CONSTRUCTOR) {
   bst<int, int> a({{1, 2}, {3, 4}});
-  bst<int, int> b(a);
-  EXPECT_NO_FATAL_FAILURE(b);
+  const bst<int, int>& b(a);
+  ASSERT_TRUE(a == b);
 }
 
 TEST(BST_INIT, OTHER_BST_COPY_INIT) {
   bst<int, int> a({{1, 2}, {3, 4}});
   bst<int, int> b = a;
-  EXPECT_NO_FATAL_FAILURE(b);
+  ASSERT_TRUE(a == b);
 }
 
 TEST(BST_OPERATIONS, BEGIN_PREORDER) {
