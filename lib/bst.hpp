@@ -5,7 +5,11 @@
 
 #include <lib/iterator/bst_iterator.hpp>
 
-template<class Key, class Value, class Traversal = Preorder, class Alloc = std::allocator<std::pair<Key, Value>>>
+#include <map>
+
+template<class Key, class Value, class Traversal = Preorder,
+    class Compare = std::less<Key>,
+    class Alloc = std::allocator<std::pair<Key, Value>>>
 class bst {
  private:
   size_t size_ = 0;
@@ -50,7 +54,7 @@ class bst {
 
   using key_type = Key;
   using mapped_type = Value;
-
+  using key_compare = Compare;
   using size_type = std::size_t;
   using node_type = Node;
 
@@ -122,55 +126,55 @@ class bst {
   const_iterator operator[](size_t i) const;
 };
 
-template<class Key, class Value, class Traversal, class Alloc>
-void bst<Key, Value, Traversal, Alloc>::clear() {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+void bst<Key, Value, Traversal, Compare, Alloc>::clear() {
   size_t bst_size = size_;
   for (size_t i = 0; i < bst_size; i++) {
     extract((*operator[](0)).value.first);
   }
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::bst(std::initializer_list<value_type> initializer_list) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::bst(std::initializer_list<value_type> initializer_list) {
   insert(initializer_list);
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-void bst<Key, Value, Traversal, Alloc>::insert(std::initializer_list<value_type> initializer_list) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+void bst<Key, Value, Traversal, Compare, Alloc>::insert(std::initializer_list<value_type> initializer_list) {
   for (auto item : initializer_list) {
     insert(item);
   }
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::iterator bst<Key, Value, Traversal, Alloc>::operator[](size_t i) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::iterator bst<Key, Value, Traversal, Compare, Alloc>::operator[](size_t i) {
   return iterator(begin() + i);
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::const_iterator bst<Key, Value, Traversal, Alloc>::operator[](size_t i) const {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::const_iterator bst<Key, Value, Traversal, Compare, Alloc>::operator[](size_t i) const {
   return iterator(cbegin() + i);
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-void bst<Key, Value, Traversal, Alloc>::del_(Node* current) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+void bst<Key, Value, Traversal, Compare, Alloc>::del_(Node* current) {
   if (!current) return;
   del_(current->left);
   del_(current->right);
   delete current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::insert_(bst::Node* current,
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::insert_(bst::Node* current,
                                                                                     std::pair<Key, Value> value) {
   if (current == nullptr) {
     last_ = new Node(value);
     ++size_;
     return last_;
-  } else if (value.first < current->value.first) {
+  } else if (key_compare{}(value.first, current->value.first)) {
     current->left = insert_(current->left, value);
     current->left->parent = current;
-  } else if (value.first > current->value.first) {
+  } else if (key_compare{}(current->value.first, value.first)) {
     current->right = insert_(current->right, value);
     current->right->parent = current;
   } else if (value.second < current->value.second) {
@@ -179,30 +183,30 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::inse
   return current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_min_(bst::Node* current) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::get_min_(bst::Node* current) {
   if (current != nullptr && current->left != nullptr) {
     return get_min_(current->left);
   }
   return current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::get_max_(bst::Node* current) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::get_max_(bst::Node* current) {
   if (current != nullptr && current->right != nullptr) {
     return get_min_(current->right);
   }
   return current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extract_(bst::Node* current, Key value) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::extract_(bst::Node* current, Key value) {
   if (!current) return nullptr;
 
-  if (value < current->value.first) {
+  if (key_compare{}(value, current->value.first)) {
     current->left = extract_(current->left, value);
     if (current->left) current->left->parent = current;
-  } else if (value > current->value.first) {
+  } else if (key_compare{}(current->value.first, value)) {
     current->right = extract_(current->right, value);
     if (current->right) current->right->parent = current;
   } else {
@@ -232,19 +236,19 @@ bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::extr
   return current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::find_(bst::Node* current, key_type value) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::find_(bst::Node* current, key_type value) {
   if (!current) { return nullptr; }
-  if (value < current->value.first) {
+  if (key_compare{}(value, current->value.first)) {
     return find_(current->left, value);
-  } else if (value > current->value.first) {
+  } else if (key_compare{}(current->value.first, value)) {
     return find_(current->right, value);
   }
   return current;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bool bst<Key, Value, Traversal, Alloc>::operator==(const bst& other) const noexcept {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bool bst<Key, Value, Traversal, Compare, Alloc>::operator==(const bst& other) const noexcept {
   if (size_ != other.size_) {
     return false;
   }
@@ -261,13 +265,13 @@ bool bst<Key, Value, Traversal, Alloc>::operator==(const bst& other) const noexc
   return true;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-bool bst<Key, Value, Traversal, Alloc>::operator!=(const bst& other) const noexcept {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+bool bst<Key, Value, Traversal, Compare, Alloc>::operator!=(const bst& other) const noexcept {
   return !(this->operator==(other));
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-typename bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, Alloc>::copy(Node* other, Node* parent) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+typename bst<Key, Value, Traversal, Compare, Alloc>::Node* bst<Key, Value, Traversal, Compare, Alloc>::copy(Node* other, Node* parent) {
   if (other == nullptr) {
     return nullptr;
   }
@@ -278,8 +282,8 @@ typename bst<Key, Value, Traversal, Alloc>::Node* bst<Key, Value, Traversal, All
   return new_node;
 }
 
-template<class Key, class Value, class Traversal, class Alloc>
-void bst<Key, Value, Traversal, Alloc>::swap(bst& other) {
+template<class Key, class Value, class Traversal, class Compare, class Alloc>
+void bst<Key, Value, Traversal, Compare, Alloc>::swap(bst& other) {
   if (*this == other) {
     return;
   }
